@@ -190,19 +190,27 @@ func parseMultipartBody(bodyData []byte, boundary string, attachments []domain.A
 			filename = params["name"]
 		}
 
+		contentID := part.Header.Get("Content-ID")
+
 		isAttachment := strings.HasPrefix(lowerDisp, "attachment") ||
-			(strings.HasPrefix(lowerDisp, "inline") && filename != "") ||
-			filename != ""
+			(strings.HasPrefix(lowerDisp, "inline") && (filename != "" || contentID != "")) ||
+			filename != "" ||
+			contentID != ""
 
 		if isAttachment {
 			if filename == "" {
-				filename = "attachment"
+				if contentID != "" {
+					filename = strings.Trim(contentID, "<>")
+				} else {
+					filename = "attachment"
+				}
 			}
-
+			
 			attachments = append(attachments, domain.Attachment{
 				Filename:    filename,
 				Content:     slurp,
 				ContentType: pctype,
+				ContentID:   contentID,
 			})
 		} else {
 			if err == nil && strings.HasPrefix(mediatype, "multipart/") {

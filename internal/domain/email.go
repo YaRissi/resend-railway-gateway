@@ -64,6 +64,7 @@ type Attachment struct {
 	Filename    string
 	Content     []byte
 	ContentType string
+	ContentID   string
 }
 
 // Tag represents provider-specific metadata tags for analytics or categorization.

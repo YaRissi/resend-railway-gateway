@@ -24,7 +24,10 @@ func main() {
 		root.Error("config_load_failed", "error", err)
 		os.Exit(1)
 	}
-
+	// optional override for Railway dynamic ports
+	if v := os.Getenv("PORT"); v != "" {
+		cfg.SMTPListerAddr = ":" + v
+	}
 
 	sender := resendclient.NewClient(cfg.ResendAPIKey, logging.New(root))
 	svc := app.NewService(sender, logging.New(root), cfg.SendTimeout)

@@ -25,6 +25,7 @@ func (c *Client) Send(email domain.Email) error {
 			"filename":     a.Filename,
 			"content_type": a.ContentType,
 			"size":         len(a.Content),
+			"content_id":   a.ContentID,
 		})
 	}
 	c.logger.Debug("resend_request_start", map[string]any{
@@ -41,6 +42,7 @@ func (c *Client) Send(email domain.Email) error {
 			Filename:    a.Filename,
 			Content:     a.Content,
 			ContentType: a.ContentType,
+			ContentId:   a.ContentID,
 		})
 	}
 	tags := make([]resendgo.Tag, 0, len(email.Tags))
