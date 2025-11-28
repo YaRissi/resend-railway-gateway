@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -29,6 +30,9 @@ func Load() (Config, error) {
 		return Config{}, fmt.Errorf("RESEND_API_KEY is required")
 	}
 	addr := getenv("SMTP_LISTEN_ADDR", ":2525")
+	if len(addr) > 0 && addr[0] != ':' && !strings.Contains(addr, ":") {
+		addr = ":" + addr
+	}
 	timeoutStr := getenv("SEND_TIMEOUT_SECONDS", "15")
 	tSec, err := strconv.Atoi(timeoutStr)
 	if err != nil || tSec <= 0 {
