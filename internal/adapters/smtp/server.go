@@ -180,20 +180,31 @@ func parseMultipartBody(bodyData []byte, boundary string, attachments []domain.A
 		pctype := part.Header.Get("Content-Type")
 		lowerDisp := strings.ToLower(disp)
 
+		// Parse content type to determine if this is text/plain, text/html, or nested multipart
+		mediatype, params, err := mime.ParseMediaType(pctype)
+
 		// Check if this is an attachment
-		if strings.HasPrefix(lowerDisp, "attachment") || (strings.HasPrefix(lowerDisp, "inline") && part.FileName() != "") {
-			filename := part.FileName()
+		// Some clients (like Vaultwarden) put the filename in the Content-Type header
+		filename := part.FileName()
+		if filename == "" && err == nil {
+			filename = params["name"]
+		}
+
+		isAttachment := strings.HasPrefix(lowerDisp, "attachment") ||
+			(strings.HasPrefix(lowerDisp, "inline") && filename != "") ||
+			filename != ""
+
+		if isAttachment {
 			if filename == "" {
 				filename = "attachment"
 			}
+
 			attachments = append(attachments, domain.Attachment{
 				Filename:    filename,
 				Content:     slurp,
 				ContentType: pctype,
 			})
 		} else {
-			// Parse content type to determine if this is text/plain, text/html, or nested multipart
-			mediatype, params, err := mime.ParseMediaType(pctype)
 			if err == nil && strings.HasPrefix(mediatype, "multipart/") {
 				// This is a nested multipart, recurse
 				nestedBoundary := params["boundary"]
