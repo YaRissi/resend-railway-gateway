@@ -61,8 +61,9 @@ func NewEmail(from string, to []string, subject, text, html string, headers map[
 
 // Attachment represents a file attachment with its filename and content.
 type Attachment struct {
-	Filename string
-	Content  []byte
+	Filename    string
+	Content     []byte
+	ContentType string
 }
 
 // Tag represents provider-specific metadata tags for analytics or categorization.

@@ -21,8 +21,9 @@ func (c *Client) Send(email domain.Email) error {
 	attachments := make([]*resendgo.Attachment, 0, len(email.Attachments))
 	for _, a := range email.Attachments {
 		attachments = append(attachments, &resendgo.Attachment{
-			Filename: a.Filename,
-			Content:  a.Content,
+			Filename:    a.Filename,
+			Content:     a.Content,
+			ContentType: a.ContentType,
 		})
 	}
 	tags := make([]resendgo.Tag, 0, len(email.Tags))

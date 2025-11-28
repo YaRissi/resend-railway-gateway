@@ -186,7 +186,11 @@ func parseMultipartBody(bodyData []byte, boundary string, attachments []domain.A
 			if filename == "" {
 				filename = "attachment"
 			}
-			attachments = append(attachments, domain.Attachment{Filename: filename, Content: slurp})
+			attachments = append(attachments, domain.Attachment{
+				Filename:    filename,
+				Content:     slurp,
+				ContentType: pctype,
+			})
 		} else {
 			// Parse content type to determine if this is text/plain, text/html, or nested multipart
 			mediatype, params, err := mime.ParseMediaType(pctype)
