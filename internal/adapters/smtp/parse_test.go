@@ -325,3 +325,120 @@ Attachment content
 		t.Errorf("expected default filename 'attachment', got '%s'", email.Attachments[0].Filename)
 	}
 }
+
+func TestParseMIMEMessage_InlineWithContentID(t *testing.T) {
+	boundary := "boundary12345"
+	raw := []byte(`Subject: Test
+From: sender@example.com
+Content-Type: multipart/related; boundary=` + boundary + `
+
+--` + boundary + `
+Content-Type: text/html
+
+<img src="cid:image.png">
+--` + boundary + `
+Content-Type: image/png
+Content-ID: <image.png>
+Content-Disposition: inline
+
+PNG content
+--` + boundary + `--
+`)
+
+	email := ParseMIMEMessage("sender@example.com", []string{"recipient@example.com"}, raw)
+
+	if len(email.Attachments) != 1 {
+		t.Errorf("expected 1 attachment, got %d", len(email.Attachments))
+	} else {
+		if email.Attachments[0].ContentID != "<image.png>" {
+			t.Errorf("expected ContentID '<image.png>', got '%s'", email.Attachments[0].ContentID)
+		}
+		// Should default filename to ContentID content if no filename param
+		if email.Attachments[0].Filename != "image.png" {
+			t.Errorf("expected filename 'image.png', got '%s'", email.Attachments[0].Filename)
+		}
+	}
+}
+
+func TestParseMIMEMessage_VaultwardenExample(t *testing.T) {
+	raw := []byte(`Message-ID: <test-id@example.com>
+To: recipient@example.com
+From: Vaultwarden <vaultwarden@example.com>
+Subject: Vaultwarden SMTP Test
+MIME-Version: 1.0
+Date: Fri, 28 Nov 2025 20:52:02 +0000
+Content-Type: multipart/alternative; boundary="boundary_alternative"
+
+--boundary_alternative
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+This is a test email.
+
+--boundary_alternative
+Content-Type: multipart/related; boundary="boundary_related"
+
+--boundary_related
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+<html><body>
+<img src=3D"cid:logo.png" />
+<img src=3D"cid:github.png" />
+</body></html>
+
+--boundary_related
+Content-ID: <logo.png>
+Content-Disposition: inline
+Content-Type: image/png
+Content-Transfer-Encoding: base64
+
+iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9
+awAAAABJRU5ErkJggg==
+
+--boundary_related
+Content-ID: <github.png>
+Content-Disposition: inline
+Content-Type: image/png
+Content-Transfer-Encoding: base64
+
+iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9
+awAAAABJRU5ErkJggg==
+
+--boundary_related--
+--boundary_alternative--
+`)
+
+	email := ParseMIMEMessage("vaultwarden@example.com", []string{"recipient@example.com"}, raw)
+
+	if email.Subject != "Vaultwarden SMTP Test" {
+		t.Errorf("expected subject 'Vaultwarden SMTP Test', got '%s'", email.Subject)
+	}
+
+	if len(email.Attachments) != 2 {
+		t.Errorf("expected 2 attachments, got %d", len(email.Attachments))
+	} else {
+		// Check first attachment (logo)
+		if email.Attachments[0].ContentID != "<logo.png>" {
+			t.Errorf("expected first ContentID '<logo.png>', got '%s'", email.Attachments[0].ContentID)
+		}
+		if email.Attachments[0].Filename != "logo.png" {
+			t.Errorf("expected first filename 'logo.png', got '%s'", email.Attachments[0].Filename)
+		}
+
+		// Check second attachment (github icon)
+		if email.Attachments[1].ContentID != "<github.png>" {
+			t.Errorf("expected second ContentID '<github.png>', got '%s'", email.Attachments[1].ContentID)
+		}
+		if email.Attachments[1].Filename != "github.png" {
+			t.Errorf("expected second filename 'github.png', got '%s'", email.Attachments[1].Filename)
+		}
+	}
+
+	if email.HTML == "" {
+		t.Error("expected HTML body, got empty")
+	}
+	if email.Text == "" {
+		t.Error("expected Text body, got empty")
+	}
+}

@@ -15,6 +15,7 @@ type benchLogger struct{}
 
 func (benchLogger) Info(string, map[string]any)  {}
 func (benchLogger) Error(string, map[string]any) {}
+func (benchLogger) Debug(string, map[string]any) {}
 
 func BenchmarkHandleEmail(b *testing.B) {
 	svc := NewService(benchSender{}, benchLogger{}, time.Second)

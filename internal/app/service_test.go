@@ -16,6 +16,7 @@ type nopLogger struct{}
 
 func (nopLogger) Info(string, map[string]any)  {}
 func (nopLogger) Error(string, map[string]any) {}
+func (nopLogger) Debug(string, map[string]any) {}
 
 func TestHandleEmail_OK(t *testing.T) {
 	svc := NewService(fakeSender{}, nopLogger{}, time.Second)
