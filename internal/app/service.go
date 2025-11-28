@@ -34,6 +34,22 @@ func (s *Service) HandleEmail(email domain.Email) error {
 	if err := email.Validate(); err != nil {
 		return err
 	}
+	attachmentMeta := make([]map[string]any, 0, len(email.Attachments))
+	for _, a := range email.Attachments {
+		attachmentMeta = append(attachmentMeta, map[string]any{
+			"filename":     a.Filename,
+			"content_type": a.ContentType,
+			"size":         len(a.Content),
+		})
+	}
+	s.logger.Debug("handle_email_start", map[string]any{
+		"from":        email.From,
+		"to":          email.To,
+		"subject":     email.Subject,
+		"text_body":   email.Text,
+		"html_body":   email.HTML,
+		"attachments": attachmentMeta,
+	})
 	ctx, cancel := context.WithTimeout(context.Background(), s.timeout)
 	defer cancel()
 	done := make(chan error, 1)

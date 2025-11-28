@@ -36,6 +36,11 @@ func (l *StdLogger) Error(msg string, fields map[string]any) {
 	l.L.LogAttrs(context.Background(), slog.LevelError, msg, l.mapAttrs(fields)...)
 }
 
+// Debug logs a message at the debug level with optional structured fields provided as a map.
+func (l *StdLogger) Debug(msg string, fields map[string]any) {
+	l.L.LogAttrs(context.Background(), slog.LevelDebug, msg, l.mapAttrs(fields)...)
+}
+
 // NewConfiguredLogger creates a new slog.Logger configured based on environment variables.
 // It uses JSON handler for cloud environments and text handler for local development.
 // Log level is controlled by LOG_LEVEL environment variable (default: INFO).

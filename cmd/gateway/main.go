@@ -26,7 +26,7 @@ func main() {
 	}
 
 
-	sender := resendclient.NewClient(cfg.ResendAPIKey)
+	sender := resendclient.NewClient(cfg.ResendAPIKey, logging.New(root))
 	svc := app.NewService(sender, logging.New(root), cfg.SendTimeout)
 	server := smtpserver.NewServer(cfg.SMTPListerAddr, svc)
 
