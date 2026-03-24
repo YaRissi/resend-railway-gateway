@@ -31,7 +31,9 @@ func Load() (Config, error) {
 	}
 	addr := getenv("SMTP_LISTEN_ADDR", ":2525")
 	if len(addr) > 0 && addr[0] != ':' && !strings.Contains(addr, ":") {
-		addr = ":" + addr
+		if _, err := strconv.Atoi(addr); err == nil {
+			addr = ":" + addr
+		}
 	}
 	timeoutStr := getenv("SEND_TIMEOUT_SECONDS", "15")
 	tSec, err := strconv.Atoi(timeoutStr)
