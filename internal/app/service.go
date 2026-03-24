@@ -43,12 +43,12 @@ func (s *Service) HandleEmail(email domain.Email) error {
 		})
 	}
 	s.logger.Debug("handle_email_start", map[string]any{
-		"from":        email.From,
-		"to":          email.To,
-		"subject":     email.Subject,
-		"text_body":   email.Text,
-		"html_body":   email.HTML,
-		"attachments": attachmentMeta,
+		"from":            email.From,
+		"to":              email.To,
+		"subject":         email.Subject,
+		"text_body_size":  len(email.Text),
+		"html_body_size":  len(email.HTML),
+		"attachments":     attachmentMeta,
 	})
 	ctx, cancel := context.WithTimeout(context.Background(), s.timeout)
 	defer cancel()
